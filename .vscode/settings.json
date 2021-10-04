@@ -1,0 +1,8 @@
+{
+    "appService.zipIgnorePattern": [
+        "node_modules{,/**}",
+        ".vscode{,/**}"
+    ],
+    "appService.deploySubpath": ".",
+    "appService.defaultWebAppToDeploy": "/subscriptions/858528bf-4788-4cd7-8127-aca09a2b5a05/resourceGroups/AppServiceQS-rg/providers/Microsoft.Web/sites/jannefilurens-texteditor"
+}
