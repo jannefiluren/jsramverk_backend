@@ -8,7 +8,7 @@ const app = express()
 const port = process.env.PORT || 1337;
 
 app.use(cors())
-app.use(bodyParser.json())
+app.use(express.json())
 
 if (process.env.NODE_ENV !== "test") {
     app.use(morgan("combined"));
