@@ -1,25 +1,21 @@
 const { MongoClient, ObjectId } = require('mongodb')
 
-// const uri = process.env.DBWEBB_DSN || "mongodb://localhost:27017/editor";
-// const uri = "mongodb+srv://texteditor:texteditor@cluster0.bjqhb.mongodb.net/editor?retryWrites=true&w=majority";
-
 const config = require("../config.json");
 
 let uri = `mongodb+srv://${config.username}:${config.password}@cluster0.bjqhb.mongodb.net/editor?retryWrites=true&w=majority`;
 
-const client = new MongoClient(uri);
-
 const database = {
 
-    readTitles: async function readTitles(db, col) {
-
+    readTitles: async function (req, res) {
+        
         const client = new MongoClient(uri);
-
+      
         try {
+
             await client.connect();
 
-            const database = client.db(db);
-            const editor = database.collection(col);
+            const database = client.db("editor");
+            const editor = database.collection("editor");
 
             const query = {}
 
@@ -31,46 +27,74 @@ const database = {
             const cursor = editor.find(query, options);
 
             if ((await cursor.count()) === 0) {
-                return []
+                return res.json([])
             }
 
-            const res = await cursor.toArray();
+            const result = await cursor.toArray();
 
-            return res
+            if (result) {
+                return res.json(result)
+            }
+
+        } catch (e) {
+
+            return res.status(500).json({
+                errors: {
+                    status: 500,
+                    title: "Database error",
+                    detail: e.message,
+                }
+            })
 
         } finally {
+
             await client.close()
+        
         }
     },
 
-    readDoc: async function readDoc(db, col, title) {
-
+    readDoc: async function (req, res) {
+        
         const client = new MongoClient(uri);
-
+        
         try {
 
             await client.connect();
 
-            const database = client.db(db);
+            const database = client.db("editor");
 
-            const docs = database.collection(col);
+            const docs = database.collection("editor");
 
-            const query = { title: title };
+            const query = { title: req.params.title };
             const options = {
                 projection: { _id: 1, title: 1, text: 1 },
             };
 
             const doc = await docs.findOne(query, options);
 
-            return doc
+            if (doc) {
+                return res.json(doc)
+            }
+
+        } catch (e) {
+
+            return res.status(500).json({
+                errors: {
+                    status: 500,
+                    title: "Database error",
+                    detail: e.message,
+                }
+            });
 
         } finally {
+
             await client.close()
+
         }
 
     },
 
-    updateDoc: async function updateDoc(db, col, doc) {
+    insertDoc: async function (req, res) {
 
         const client = new MongoClient(uri);
 
@@ -78,15 +102,54 @@ const database = {
 
             await client.connect();
 
-            const database = client.db(db);
+            const database = client.db("editor");
 
-            const editor = database.collection(col);
+            const editor = database.collection("editor");
 
-            const filter = { _id: ObjectId(doc["docId"]) };
+            const doc = {
+                title: req.body.title
+            }
+
+            const result = await editor.insertOne(doc);
+
+            console.log(`A document was inserted with the _id: ${result.insertedId}`);
+            
+            return res.status(201).json(result);
+
+        } catch (e) {
+
+            return res.status(500).json({
+                errors: {
+                    status: 500,
+                    title: "Database error",
+                    detail: e.message,
+                }
+            });
+
+        } finally {
+
+            await client.close();
+
+        }
+    },
+
+    updateDoc: async function (req, res) {
+
+        const client = new MongoClient(uri);
+
+        try {
+
+            await client.connect();
+
+            const database = client.db("editor");
+
+            const editor = database.collection("editor");
+
+            const filter = { _id: ObjectId(req.body.docId) };
 
             const updateDoc = {
                 $set: {
-                  text: doc["docText"]
+                  text: req.body.docText
                 },
               };
 
@@ -98,36 +161,29 @@ const database = {
                 `${result.matchedCount} document(s) matched the filter, updated ${result.modifiedCount} document(s)`,
             );
 
+            if (result) {
+                return res.status(204).send()
+            }
+
+        } catch (e) {
+
+            return res.status(500).json({
+                errors: {
+                    status: 500,
+                    title: "Database error",
+                    detail: e.message,
+                }
+            });
+
         } finally {
+
             await client.close();
+
         }
 
     },
 
-    insertDoc: async function insertDoc(db, col, title) {
-
-        const client = new MongoClient(uri);
-
-        try {
-
-            await client.connect();
-
-            const database = client.db(db);
-
-            const editor = database.collection(col);
-
-            const doc = {
-                title: title
-            }
-
-            const result = await editor.insertOne(doc);
-
-            console.log(`A document was inserted with the _id: ${result.insertedId}`);
-
-        } finally {
-            await client.close();
-        }
-    }
+    
 
 }
 

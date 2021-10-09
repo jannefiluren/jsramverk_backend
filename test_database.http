@@ -1,0 +1,26 @@
+
+### All titles
+GET http://localhost:1337/all_titles
+
+
+### Read document
+GET http://localhost:1337/read_doc/Min dagbok
+
+
+### Insert doc
+POST http://localhost:1337/insert_doc
+content-type: application/json
+
+{
+    "title": "from rest client"
+}
+
+### Update doc
+
+POST http://localhost:1337/update_doc
+content-type: application/json
+
+{
+    "docId": "61618b027c55bfdfc34657c0",
+    "docText": "Updated content"
+}
