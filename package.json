@@ -2,9 +2,9 @@
   "name": "jsramverk_backend",
   "version": "1.0.0",
   "description": "myapp",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "nyc --reporter=html --reporter=text --reporter=clover mocha --timeout 10000",
     "start": "node ./app.js",
     "watch": "nodemon ./app.js"
   },
@@ -18,6 +18,8 @@
     "morgan": "^1.10.0"
   },
   "devDependencies": {
+    "chai": "^4.3.4",
+    "chai-http": "^4.3.0",
     "mocha": "^9.1.2",
     "nyc": "^15.1.0"
   }
